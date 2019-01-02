@@ -1,0 +1,33 @@
+{
+  "name": "@skarif2/logger",
+  "version": "0.1.0",
+  "description": "Log request details including req and res body.",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com:skarif2/logger.git"
+  },
+  "keywords": [
+    "request",
+    "log",
+    "log-request",
+    "body",
+    "req",
+    "res",
+    "logging"
+  ],
+  "author": "Sk Arif<skarif2@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/skarif2/logger/issues"
+  },
+  "homepage": "https://github.com/skarif2/logger#readme",
+  "dependencies": {
+    "chalk": "^2.4.1",
+    "consola": "^2.3.0",
+    "on-finished": "^2.3.0"
+  }
+}
