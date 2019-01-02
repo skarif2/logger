@@ -3,13 +3,6 @@
  * Copyright(c) 2019 Sk Arif
  * MIT Licensed
  */
-
-'use strict'
-
-/**
- * require dependencies
- * @private
- */
 const consola = require('consola')
 const onFinished = require('on-finished')
 
@@ -34,7 +27,7 @@ function requestLogger (options) {
         }
       }
     }
-    onFinished(res, function (err, res) {
+    onFinished(res, (err, res) => {
       if (!err) {
         const diff = process.hrtime(req.startAt)
         const resTime = (diff[0] * 1e3 + diff[1] * 1e-6).toFixed(2)
