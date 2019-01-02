@@ -10,8 +10,8 @@
  * require dependencies
  * @private
  */
-var consola = require('consola')
-var onFinished = require('on-finished')
+const consola = require('consola')
+const onFinished = require('on-finished')
 
 /**
  * log req and res body with request details
@@ -23,7 +23,7 @@ var onFinished = require('on-finished')
 function requestLogger (options) {
   return function requestLogger (req, res, next) {
     req.startAt = process.hrtime()
-    var response = res.app.response.send
+    const response = res.app.response.send
     res.app.response.send = function send(body) {
       response.call(this, body)
       if (body) {
@@ -35,47 +35,34 @@ function requestLogger (options) {
       }
     }
     onFinished(res, function (err, res) {
-      log(err, req, res)
+      if (!err) {
+        const diff = process.hrtime(req.startAt)
+        const resTime = (diff[0] * 1e3 + diff[1] * 1e-6).toFixed(2)
+        const reqObj = {
+          headers: req.headers || {},
+          params: req.params || {},
+          query: req.query || {},
+          body: req.body || {}
+        }
+        const resObj = {
+          statusCode: res.statusCode
+        }
+        if (res.body) {
+          resObj.body = res.body
+        }
+        consola.info('req:', reqObj)
+        consola.info('res:', resObj)
+        if (res.statusCode >= 400 && res.statusCode < 500) {
+          consola.warn(resObj.body || res.statusMessage)
+        } else if (res.statusCode >= 500) {
+          consola.error(resObj.body || res.statusMessage)
+        }
+        consola.log(`${coloredRequest(res.statusCode, req.httpVersion)} ${
+          coloredMethod(req.method)} ${req.originalUrl} - ${
+          coloredStatus(res.statusCode)} - ${resTime}ms`)
+      }
     })
     next()
-  }
-}
-
-/**
- * log req and res body
- * @private
- */
-function log(err, req, res) {
-  if (!err) {
-    var diff = process.hrtime(req.startAt)
-    var resTime = (diff[0] * 1e3 + diff[1] * 1e-6).toFixed(2)
-
-    var reqObj = {
-      headers: req.headers || {},
-      params: req.params || {},
-      query: req.query || {},
-      body: req.body || {}
-    }
-    var resObj = {
-      statusCode: res.statusCode
-    }
-    if (res.body) {
-      resObj.body = res.body
-    }
-
-    /**
-     * log infornations
-     */
-    consola.info('req:', reqObj)
-    consola.info('res:', resObj)
-    if (res.statusCode >= 400 && res.statusCode < 500) {
-      consola.warn(resObj.body || res.statusMessage)
-    } else if (res.statusCode >= 500) {
-      consola.error(resObj.body || res.statusMessage)
-    }
-    consola.log(coloredRequest(res.statusCode, req.httpVersion)
-      + ' ' + coloredMethod(req.method) + ' ' + req.originalUrl + ' - '
-      + coloredStatus(res.statusCode) + ' - ' + resTime + ' ms')
   }
 }
 
