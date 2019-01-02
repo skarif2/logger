@@ -13,7 +13,6 @@
     "logging"
   ],
   "dependencies": {
-    "chalk": "^2.4.1",
     "consola": "^2.3.0",
     "on-finished": "^2.3.0"
   },
