@@ -1,4 +1,4 @@
-# logger
+# logger 🌱
 
 [![Build Status](https://travis-ci.com/skarif2/logger.svg?branch=master)](https://travis-ci.com/skarif2/logger)
 [![dependencies Status](https://david-dm.org/skarif2/logger/status.svg)](https://david-dm.org/skarif2/logger)
@@ -7,9 +7,11 @@
 
 Logger is a express middleware that can be used to log request details to the console
 
+**Note:** One must use a parser (ie: [body-parser](https://www.npmjs.com/package/body-parser)) before using logger.
+
 ## Usages
 
-### Enable logger for all requests
+### ✔ *Enable logger for all requests*
 ```
 var express = require('express')
 var logger = require('@skarif2/logger)
@@ -30,7 +32,7 @@ app.listen(3000, function () {
 })
 ```
 
-### Enable logger for a single route
+### ✔ *Enable logger for a single route*
 ```
 var express = require('express')
 var logger = require('@skarif2/logger)
@@ -54,6 +56,3 @@ app.listen(3000, function () {
   console.log('Listening on port 3000')
 })
 ```
-
-**Note:** One must use a parser (ie: [body-parser](https://www.npmjs.com/package/body-parser)) before using logger.
-
