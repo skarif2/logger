@@ -5,16 +5,20 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/2a0c31825e520752692b/maintainability)](https://codeclimate.com/github/skarif2/logger/maintainability)
 [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://img.shields.io/badge/license-MIT-brightgreen.svg)
 
-Logger is a express middleware that can be used to log request details to the console
+Logger is an [express](http://expressjs.com) middleware that can be used to log request details to the console.
 
-**Note:** One must use a parser (ie: [body-parser](https://www.npmjs.com/package/body-parser)) before using logger.
+<div align='center'>
+  <img src='media/logger.png' alt='Logger'>
+</div>
+
+**Note:** A parser (ie: [body-parser](https://www.npmjs.com/package/body-parser))  should be used before initializing logger.
 
 ## Usages
 
 ### ✔ *Enable logger for all requests*
 ```
 var express = require('express')
-var logger = require('@skarif2/logger)
+var logger = require('@skarif2/logger')
 var app = express()
 
 app.use(express.json())
@@ -35,7 +39,7 @@ app.listen(3000, function () {
 ### ✔ *Enable logger for a single route*
 ```
 var express = require('express')
-var logger = require('@skarif2/logger)
+var logger = require('@skarif2/logger')
 var app = express()
 
 app.use(express.json())

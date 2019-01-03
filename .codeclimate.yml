@@ -5,4 +5,5 @@ plugins:
 exclude_patterns:
 - "__test__/"
 - "node_modules/"
-- "example/"
+- "examples/"
+- "media/"

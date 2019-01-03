@@ -1,4 +1,5 @@
 node_modules
 package-lock.json
 coverage
-example
+app
+.DS_Store
