@@ -10,7 +10,6 @@ var onFinished = require('on-finished')
 /**
  * log req and res body with request details
  *
- * @param {Object} [options]
  * @return {Function} middleware
  * @public
  */
@@ -29,68 +28,70 @@ function requestLogger () {
       }
     }
     onFinished(res, function (err, res) {
-      if (!err) {
-        var diff = process.hrtime(req.startAt)
-        var resTime = (diff[0] * 1e3 + diff[1] * 1e-6).toFixed(2)
-        var reqObj = {
-          headers: req.headers || {},
-          params: req.params || {},
-          query: req.query || {},
-          body: req.body || {}
-        }
-        var resObj = { statusCode: res.statusCode }
-        if (res.body) {
-          resObj.body = res.body
-        }
-        var utilRules = {
-          colors: true,
-          compact: false
-        }
+      if (err) {
+        consola.warn(err)
+        return
+      }
+      var diff = process.hrtime(req.startAt)
+      var resTime = (diff[0] * 1e3 + diff[1] * 1e-6).toFixed(2)
+      var reqObj = {
+        headers: req.headers || {},
+        params: req.params || {},
+        query: req.query || {},
+        body: req.body || {}
+      }
+      var resObj = { statusCode: res.statusCode }
+      if (res.body) {
+        resObj.body = res.body
+      }
+      var utilRules = {
+        colors: true,
+        compact: false
+      }
 
-        consola.log(coloredSign(res.statusCode)
-          + ' req: '
-          + util.inspect(reqObj, utilRules)
+      consola.log(_sign(res.statusCode)
+        + ' req: '
+        + util.inspect(reqObj, utilRules)
+      )
+
+      consola.log(_sign(res.statusCode)
+        + ' res: '
+        + util.inspect(resObj, utilRules)
+      )
+
+      if ((res.statusCode / 100 | 0) === 4) {
+        consola.warn(res.body
+          ? res.body
+          : res.statusMessage
         )
-
-        consola.log(coloredSign(res.statusCode)
-          + ' res: '
-          + util.inspect(resObj, utilRules)
-        )
-
-        if ((res.statusCode / 100 | 0) === 4) {
-          consola.warn(res.body
-            ? res.body
-            : res.statusMessage
-          )
-        } else if ((res.statusCode / 100 | 0) === 5) {
-          consola.error(res.body
-            ? res.body
-            : res.statusMessage
-          )
-        }
-
-        consola.log(coloredRequest(res.statusCode, req.httpVersion)
-          + ' '
-          + coloredMethod(req.method)
-          + ' '
-          + req.originalUrl
-          + ' - '
-          + coloredStatus(res.statusCode)
-          + ' - '
-          + resTime
-          + ' ms'
+      } else if ((res.statusCode / 100 | 0) === 5) {
+        consola.error(res.body
+          ? res.body
+          : res.statusMessage
         )
       }
+
+      consola.log(_request(res.statusCode,req.httpVersion)
+        + ' '
+        + _method(req.method)
+        + ' '
+        + req.originalUrl
+        + ' - '
+        + _status(res.statusCode)
+        + ' - '
+        + resTime
+        + ' ms'
+      )
     })
     next()
   }
 }
 
 /**
- * get colored sign depending on status
+ * get colored sign
  * @private
  */
-function coloredSign (status) {
+function _sign (status) {
   return ({
     2: '\x1b[92m',
     3: '\x1b[94m',
@@ -104,7 +105,7 @@ function coloredSign (status) {
  * get colored method
  * @private
  */
-function coloredMethod (method) {
+function _method (method) {
   return ({
     get: '\x1b[32m',
     head: '\x1b[32m',
@@ -124,7 +125,7 @@ function coloredMethod (method) {
  * get http version with background color
  * @private
  */
-function coloredRequest (status, httpVersion) {
+function _request (status, httpVersion) {
   return ({
     2: '\x1b[42m',
     3: '\x1b[44m',
@@ -139,7 +140,7 @@ function coloredRequest (status, httpVersion) {
  * get colored status
  * @private
  */
-function coloredStatus (status) {
+function _status (status) {
   return ({
     2: '\x1b[32m',
     3: '\x1b[34m',
