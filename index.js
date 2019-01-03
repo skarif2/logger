@@ -3,8 +3,9 @@
  * Copyright(c) 2019 Sk Arif
  * MIT Licensed
  */
-const consola = require('consola')
-const onFinished = require('on-finished')
+var util = require('util')
+var consola = require('consola')
+var onFinished = require('on-finished')
 
 /**
  * log req and res body with request details
@@ -13,10 +14,10 @@ const onFinished = require('on-finished')
  * @return {Function} middleware
  * @public
  */
-function requestLogger (options) {
+function requestLogger () {
   return function requestLogger (req, res, next) {
     req.startAt = process.hrtime()
-    const response = res.app.response.send
+    var response = res.app.response.send
     res.app.response.send = function send(body) {
       response.call(this, body)
       if (body) {
@@ -27,36 +28,76 @@ function requestLogger (options) {
         }
       }
     }
-    onFinished(res, (err, res) => {
+    onFinished(res, function (err, res) {
       if (!err) {
-        const diff = process.hrtime(req.startAt)
-        const resTime = (diff[0] * 1e3 + diff[1] * 1e-6).toFixed(2)
-        const reqObj = {
+        var diff = process.hrtime(req.startAt)
+        var resTime = (diff[0] * 1e3 + diff[1] * 1e-6).toFixed(2)
+        var reqObj = {
           headers: req.headers || {},
           params: req.params || {},
           query: req.query || {},
           body: req.body || {}
         }
-        const resObj = {
-          statusCode: res.statusCode
-        }
+        var resObj = { statusCode: res.statusCode }
         if (res.body) {
           resObj.body = res.body
         }
-        consola.info('req:', reqObj)
-        consola.info('res:', resObj)
-        if (res.statusCode >= 400 && res.statusCode < 500) {
-          consola.warn(resObj.body || res.statusMessage)
-        } else if (res.statusCode >= 500) {
-          consola.error(resObj.body || res.statusMessage)
+        var utilRules = {
+          colors: true,
+          compact: false
         }
-        consola.log(`${coloredRequest(res.statusCode, req.httpVersion)} ${
-          coloredMethod(req.method)} ${req.originalUrl} - ${
-          coloredStatus(res.statusCode)} - ${resTime}ms`)
+
+        consola.log(coloredSign(res.statusCode)
+          + ' req: '
+          + util.inspect(reqObj, utilRules)
+        )
+
+        consola.log(coloredSign(res.statusCode)
+          + ' res: '
+          + util.inspect(resObj, utilRules)
+        )
+
+        if ((res.statusCode / 100 | 0) === 4) {
+          consola.warn(res.body
+            ? res.body
+            : res.statusMessage
+          )
+        } else if ((res.statusCode / 100 | 0) === 5) {
+          consola.error(res.body
+            ? res.body
+            : res.statusMessage
+          )
+        }
+
+        consola.log(coloredRequest(res.statusCode, req.httpVersion)
+          + ' '
+          + coloredMethod(req.method)
+          + ' '
+          + req.originalUrl
+          + ' - '
+          + coloredStatus(res.statusCode)
+          + ' - '
+          + resTime
+          + ' ms'
+        )
       }
     })
     next()
   }
+}
+
+/**
+ * get colored sign depending on status
+ * @private
+ */
+function coloredSign (status) {
+  return ({
+    2: '\x1b[92m',
+    3: '\x1b[94m',
+    4: '\x1b[93m',
+    5: '\x1b[91m'
+  }[status / 100 | 0] || '\x1b[39m')
+  + '\x1b[1m✔\x1b[0m'
 }
 
 /**
@@ -76,7 +117,7 @@ function coloredMethod (method) {
     patch: '\x1b[34m'
   }[method.toLowerCase()] || '\x1b[39m')
   + method
-  + '\x1b[49m\x1b[39m'
+  + '\x1b[0m'
 }
 
 /**
@@ -91,7 +132,7 @@ function coloredRequest (status, httpVersion) {
     5: '\x1b[41m'
   }[status / 100 | 0] || '\x1b[49m')
   + '\x1b[30m HTTP/' + httpVersion + ' '
-  + '\x1b[49m\x1b[39m'
+  + '\x1b[0m'
 }
 
 /**
@@ -106,7 +147,7 @@ function coloredStatus (status) {
     5: '\x1b[31m'
   }[status / 100 | 0] || '\x1b[39m')
   + status
-  + '\x1b[39m'
+  + '\x1b[0m'
 }
 
 /**

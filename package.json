@@ -4,7 +4,8 @@
   "version": "0.1.0",
   "author": "Sk Arif <skarif2@gmail.com>",
   "license": "MIT",
-  "repository": "skarif2/logger",
+  "repository": "github:skarif2/logger",
+  "homepage": "https://github.com/skarif2/logger#readme",
   "keywords": [
     "request",
     "body",
@@ -22,5 +23,8 @@
   ],
   "scripts": {
     "test": "jest"
+  },
+  "devDependencies": {
+    "eslint": "^5.11.1"
   }
 }
