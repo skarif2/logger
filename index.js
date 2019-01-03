@@ -1,5 +1,5 @@
 /*!
- * request-logger
+ * logger
  * Copyright(c) 2019 Sk Arif
  * MIT Licensed
  */
@@ -13,78 +13,95 @@ var onFinished = require('on-finished')
  * @return {Function} middleware
  * @public
  */
-function requestLogger () {
-  return function requestLogger (req, res, next) {
-    req.startAt = process.hrtime()
-    var response = res.app.response.send
-    res.app.response.send = function send(body) {
-      response.call(this, body)
-      if (body) {
-        try {
-          res.body = JSON.parse(body)
-        } catch (e) {
-          res.body = body
-        }
+function logger (req, res, next) {
+  req.startAt = process.hrtime()
+  var response = res.app.response.send
+  res.app.response.send = function send(body) {
+    response.call(this, body)
+    if (body) {
+      try {
+        res.body = JSON.parse(body)
+      } catch (e) {
+        res.body = body
       }
     }
-    onFinished(res, function (err, res) {
-      if (err) {
-        consola.warn(err)
-        return
-      }
-      var diff = process.hrtime(req.startAt)
-      var resTime = (diff[0] * 1e3 + diff[1] * 1e-6).toFixed(2)
-      var reqObj = {
-        headers: req.headers || {},
-        params: req.params || {},
-        query: req.query || {},
-        body: req.body || {}
-      }
-      var resObj = { statusCode: res.statusCode }
-      if (res.body) {
-        resObj.body = res.body
-      }
-      var utilRules = {
-        colors: true,
-        compact: false
-      }
-
-      consola.log(_sign(res.statusCode)
-        + ' req: '
-        + util.inspect(reqObj, utilRules)
-      )
-
-      consola.log(_sign(res.statusCode)
-        + ' res: '
-        + util.inspect(resObj, utilRules)
-      )
-
-      if ((res.statusCode / 100 | 0) === 4) {
-        consola.warn(res.body
-          ? res.body
-          : res.statusMessage
-        )
-      } else if ((res.statusCode / 100 | 0) === 5) {
-        consola.error(res.body
-          ? res.body
-          : res.statusMessage
-        )
-      }
-
-      consola.log(_request(res.statusCode,req.httpVersion)
-        + ' '
-        + _method(req.method)
-        + ' '
-        + req.originalUrl
-        + ' - '
-        + _status(res.statusCode)
-        + ' - '
-        + resTime
-        + ' ms'
-      )
-    })
-    next()
   }
+  onFinished(res, function (err, res) {
+    log(err, req, res)
+  })
+  next()
+}
+
+function log (err, req, res) {
+  if (err) {
+    consola.warn(err)
+    return
+  }
+  var diff = process.hrtime(req.startAt)
+  res.responseTime = (diff[0] * 1e3 + diff[1] * 1e-6).toFixed(2)
+  var reqObj = {
+    headers: req.headers || {},
+    params: req.params || {},
+    query: req.query || {},
+    body: req.body || {}
+  }
+  var resObj = {
+    statusCode: res.statusCode
+  }
+  if (res.body) {
+    resObj.body = res.body
+  }
+  logObj('req', res.statusCode, reqObj)
+  logObj('res', res.statusCode, resObj)
+  logError(res)
+  logRequest(req, res)
+}
+
+/**
+ * log object
+ * @private
+ */
+function logObj (type, status, obj) {
+  consola.log(_sign(status)
+    + ' '
+    + type
+    + ': '
+    + util.inspect(obj, {
+      colors: true,
+      compact: false
+    })
+  )
+}
+
+/**
+ * log error
+ * @private
+ */
+function logError (res) {
+  var body = res.body ? res.body : res.statusMessage
+  if ((res.statusCode / 100 | 0) === 4) {
+    consola.warn(body)
+  } else if ((res.statusCode / 100 | 0) === 5) {
+    consola.error(body)
+  }
+}
+
+/**
+ * log error
+ * @private
+ */
+function logRequest (req, res) {
+  consola.log(_request(res.statusCode, req.httpVersion)
+    + ' '
+    + _method(req.method)
+    + ' '
+    + req.originalUrl
+    + ' - '
+    + _status(res.statusCode)
+    + ' - '
+    + res.responseTime
+    + ' ms'
+  )
 }
 
 /**
@@ -151,7 +168,6 @@ function _status (status) {
   + '\x1b[0m'
 }
 
-/**
- * export requestLogger module
- */
-module.exports = requestLogger
+module.exports = function () {
+  return logger
+}
