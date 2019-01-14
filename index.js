@@ -57,7 +57,13 @@ function log (err, req, res) {
   }
 
   if (res.body) {
-    resObj.body = res.body
+    resObj.body = Object.assign({}, res.body)
+    if (res.statusCode >= 400 && resObj.body.stack) {
+      var stackArr = resObj.body.stack.split('\n    ')
+      resObj.body.stack = stackArr[0]
+        + stackArr[1]
+        + ' <...>'
+    }
   }
 
   logObj('req', res.statusCode, reqObj)
