@@ -1,7 +1,7 @@
 {
   "name": "@skarif2/logger",
   "description": "Express middleware for console logging request details",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "author": "Sk Arif <skarif2@gmail.com>",
   "license": "MIT",
   "repository": "github:skarif2/logger",
