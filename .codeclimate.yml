@@ -6,3 +6,4 @@ exclude_patterns:
 - "__test__/"
 - "node_modules/"
 - "examples/"
+- "app/"
