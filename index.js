@@ -45,31 +45,43 @@ function log (err, req, res) {
   var time = diff[0] * 1e3 + diff[1] * 1e-6
   res.responseTime = time.toFixed(2)
 
-  var reqObj = {
+  logObj('req', res.statusCode, reqObj(req))
+  logObj('res', res.statusCode, resObj(res))
+  logError(res)
+  logRequest(req, res)
+}
+
+/**
+ * custom req object
+ * @private
+ */
+function reqObj (req) {
+  return {
     headers: req.headers || {},
     params: req.params || {},
     query: req.query || {},
     body: req.body || {}
   }
+}
 
-  var resObj = {
+/**
+ * custom res object
+ * @private
+ */
+function resObj (res) {
+  var obj = {
     statusCode: res.statusCode
   }
-
   if (res.body) {
-    resObj.body = Object.assign({}, res.body)
-    if (res.statusCode >= 400 && resObj.body.stack) {
-      var stackArr = resObj.body.stack.split('\n    ')
-      resObj.body.stack = stackArr[0]
+    obj.body = Object.assign({}, res.body)
+    if (res.statusCode >= 400 && obj.body.stack) {
+      var stackArr = obj.body.stack.split('\n    ')
+      obj.body.stack = stackArr[0]
         + stackArr[1]
         + ' <...>'
     }
   }
-
-  logObj('req', res.statusCode, reqObj)
-  logObj('res', res.statusCode, resObj)
-  logError(res)
-  logRequest(req, res)
+  return obj
 }
 
 /**
