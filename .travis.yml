@@ -14,3 +14,4 @@ git:
 
 script:
   - jest --coverage --coverageReporters=text-lcov | coveralls && rm -rf ./coverage
+  
